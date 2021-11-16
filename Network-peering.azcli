@@ -1,0 +1,249 @@
+#Create the virtual networks
+
+
+#create the virtual network and subnet for the Sales systems.
+az network vnet create \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --name SalesVNet \
+    --address-prefixes 10.1.0.0/16 \
+    --subnet-name Apps \
+    --subnet-prefixes 10.1.1.0/24 \
+    --location northeurope
+
+#create the virtual network and subnet for the Marketing systems.
+
+az network vnet create \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --name MarketingVNet \
+    --address-prefixes 10.2.0.0/16 \
+    --subnet-name Apps \
+    --subnet-prefixes 10.2.1.0/24 \
+    --location northeurope
+
+#create the virtual network and subnet for the Research systems.
+
+az network vnet create \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --name ResearchVNet \
+    --address-prefixes 10.3.0.0/16 \
+    --subnet-name Data \
+    --subnet-prefixes 10.3.1.0/24 \
+    --location westeurope
+
+#Check and Confirm the virtual network configuration
+
+az network vnet list --output table
+
+
+###############################################################################################
+### Create virtual machines in each virtual network #####
+# Create an Ubuntu VM in the Apps subnet of SalesVNet
+
+az vm create \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --no-wait \ #It lets you continue working in Cloud Shell while the VM is building
+    --public-ip-sku Standard
+    --name SalesVM \
+    --location northeurope \
+    --vnet-name SalesVNet \
+    --subnet Apps \
+    --image UbuntuLTS \
+    --admin-username azureuser \
+    --admin-password <password> #The password length must be between 12 and 72. Password must have the 3 of the following:
+      # 1 lower case character,1 upper case character, 1 number and 1 special character.
+
+
+
+# Create an Ubuntu VM in the Apps subnet of MarketingVNet
+
+az vm create \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --no-wait \ #It lets you continue working in Cloud Shell while the VM is building
+    --public-ip-sku Standard
+    --name MarketingVM \
+    --location northeurope \
+    --vnet-name MarketingVNet \
+    --subnet Apps \
+    --image UbuntuLTS \
+    --admin-username azureuser \
+    --admin-password <password> #The password length must be between 12 and 72. Password must have the 3 of the following:
+      # 1 lower case character,1 upper case character, 1 number and 1 special character.
+
+
+
+# Create an Ubuntu VM in the Data subnet of ResearchVNet
+
+az vm create \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --no-wait \ #It lets you continue working in Cloud Shell while the VM is building
+    --public-ip-sku Standard
+    --name ResearchVM \
+    --location westeurope \
+    --vnet-name ResearchVNet \
+    --subnet Data \
+    --image UbuntuLTS \
+    --admin-username azureuser \
+    --admin-password <password> #The password length must be between 12 and 72. Password must have the 3 of the following:
+      # 1 lower case character,1 upper case character, 1 number and 1 special character.
+
+
+
+# Check and confirm that the VMs are running
+
+watch -d -n 5 "az vm list \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --show-details \
+    --query '[*].{Name:name, ProvisioningState:provisioningState, PowerState:powerState}' \
+    --output table"
+
+# Now we have three VMs Running and ready
+
+
+########################################################################################################################
+########################################################################################################################
+####################### Now Create Peering Connection between Vnets  ###################################################
+
+### Create the peering connection between the SalesVNet and MarketingVNet virtual networks ####
+
+#from SalesVNet to MarketingVNet
+
+az network vnet peering create \
+    --name SalesVNet-To-MarketingVNet \
+    --remote-vnet MarketingVNet \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name SalesVNet \
+    --allow-vnet-access #Permits virtual network access across this peering connection.
+
+#Create a reciprocal connection from MarketingVNet to SalesVNet.
+
+az network vnet peering create \
+    --name MarketingVNet-To-SalesVNet \
+    --remote-vnet SalesVNet \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name MarketingVNet \
+    --allow-vnet-access #Permits virtual network access across this peering connection.
+
+# check the peering connection between the MarketingVNet and SalesVNet virtual networks.
+# Let's check it
+az network vnet peering list \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name SalesVNet \
+    --output table
+
+### Create the peering connection between the MarketingVNet and ResearchVNet virtual networks ####
+
+#from MarketingVNet to ResearchVNet
+
+az network vnet peering create \
+    --name MarketingVNet-To-ResearchVNet \
+    --remote-vnet ResearchVNet \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name MarketingVNet \
+    --allow-vnet-access #Permits virtual network access across this peering connection.
+
+
+#Create a reciprocal connection from ResearchVNet to MarketingVNet.
+
+az network vnet peering create \
+    --name ResearchVNet-To-MarketingVNet \
+    --remote-vnet MarketingVNet \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name ResearchVNet \
+    --allow-vnet-access #Permits virtual network access across this peering connection.
+
+# check the peering connection between the ResearchVNet and MarketingVNet virtual networks.
+# Let's check it
+
+az network vnet peering list \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name ResearchVNet \
+    --output table
+
+# check the peering connections for the MarketingVNet virtual network.
+# Let's check it
+az network vnet peering list \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --vnet-name MarketingVNet \
+    --output table
+
+
+
+
+##############$$$$$$$$$$$$$$ Check effective routes  $$$$$$$$$$$####################
+
+#### To look at the routes that apply to the SalesVM network interface.
+
+az network nic show-effective-route-table \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --name SalesVMVMNic \
+    --output table
+
+#Result have a VNetPeering
+
+#### Same to MarketingVM.
+
+az network nic show-effective-route-table \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --name MarketingVMVMNic \
+    --output table
+
+#Result have a VNetPeering too and another for VNetGlobalPeering
+
+#### Same to ResearchVM
+az network nic show-effective-route-table \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --name ResearchVMVMNic \
+    --output table
+
+#Result have a VNetGlobalPeering 
+
+################$$$$$$$$$$$$$$$$$$###############
+##### We can check with SSH connection too
+#now we need to list IPs (Private and Public)
+az vm list \
+    --resource-group learn-111ca2b2-88bf-4015-9561-486ae449f23a \
+    --query "[*].{Name:name, PrivateIP:privateIps, PublicIP:publicIps}" \
+    --show-details \
+    --output table
+
+#MarketingVM  10.2.1.4     20.67.197.44
+#SalesVM      10.1.1.4     52.169.54.254
+#ResearchVM   10.3.1.4     20.93.212.69
+
+#Let's start our test first from SalesVM
+
+## We will connect from SalesVM to MarketingVM and ResearchVM
+#Start Connection first to SalesVM
+ssh -o StrictHostKeyChecking=no azureuser@<SalesVM public IP> # Connection established
+#Now try connect to MarketingVM
+ssh -o StrictHostKeyChecking=no azureuser@<MarketingVM public IP># Connection established
+#Now try connect to ResearchVM
+ssh -o StrictHostKeyChecking=no azureuser@<ResearchVM public IP># in this test you should get no connection
+
+
+#Now our test from ResearchVM
+
+## We will connect from ResearchVM to MarketingVM and SalesVM
+#Start Connection first to ResearchVM
+ssh -o StrictHostKeyChecking=no azureuser@<ResearchVM public IP> # Connection established
+#Now try connect to MarketingVM
+ssh -o StrictHostKeyChecking=no azureuser@<MarketingVM public IP># Connection established
+#Now try connect to SalesVM
+ssh -o StrictHostKeyChecking=no azureuser@<SalesVM public IP># in this test you should get no connection
+
+
+
+#Now our test from MarketingVM
+
+## We will connect from MarketingVM to ResearchVM and SalesVM
+#Start Connection first to MarketingVM
+ssh -o StrictHostKeyChecking=no azureuser@<MarketingVM public IP> # Connection established
+#Now try connect to ResearchVM
+ssh -o StrictHostKeyChecking=no azureuser@<MarketingVM public IP># Connection established
+#Now try connect to SalesVM
+ssh -o StrictHostKeyChecking=no azureuser@<SalesVM public IP># Connection established
+
+#Good Work 
+#We finally get it 
+#Don't forget to clean Up used resources when you finish your lab
+#Have a nice day
