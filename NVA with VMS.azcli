@@ -1,0 +1,125 @@
+# Deploy the network virtual appliance
+az vm create \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --name nva \
+    --vnet-name vnet \
+    --subnet dmzsubnet \
+    --image UbuntuLTS \
+    --admin-username azureuser \
+    --admin-password <password>
+
+
+#Enable IP forwarding for the Azure network interface
+
+#get the ID of the NVA network interface
+NICID=$(az vm nic list \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --vm-name nva \
+    --query "[].{id:id}" --output tsv)
+
+echo $NICID
+
+
+#get the name of the NVA network interface.
+
+NICNAME=$(az vm nic show \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --vm-name nva \
+    --nic $NICID \
+    --query "{name:name}" --output tsv)
+
+echo $NICNAME
+
+#enable IP forwarding for the network interface
+
+az network nic update --name $NICNAME \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --ip-forwarding true
+
+
+#Enable IP forwarding in the appliance
+
+#save the public IP address of the NVA virtual machine to the variable NVAIP
+
+NVAIP="$(az vm list-ip-addresses \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --name nva \
+    --query "[].virtualMachine.network.publicIpAddresses[*].ipAddress" \
+    --output tsv)"
+
+echo $NVAIP
+
+#enable IP forwarding within the NVA.
+
+ssh -t -o StrictHostKeyChecking=no azureuser@$NVAIP 'sudo sysctl -w net.ipv4.ip_forward=1; exit;'
+
+
+
+
+
+# Now Route traffic through the NVA
+
+# let's Create public and private virtual machines
+# create file with name cloud-init.txt and add: 
+# cloud-config
+# package_upgrade: true
+# packages:
+#    - inetutils-traceroute
+
+#now  create the public VM
+az vm create \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --name public \
+    --vnet-name vnet \
+    --subnet publicsubnet \
+    --image UbuntuLTS \
+    --admin-username azureuser \
+    --no-wait \
+    --custom-data cloud-init.txt \
+    --admin-password <password>
+
+#Then create the private VM
+
+az vm create \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --name private \
+    --vnet-name vnet \
+    --subnet privatesubnet \
+    --image UbuntuLTS \
+    --admin-username azureuser \
+    --no-wait \
+    --custom-data cloud-init.txt \
+    --admin-password <password>
+
+#Finaly check that the VMs are running
+watch -d -n 5 "az vm list \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --show-details \
+    --query '[*].{Name:name, ProvisioningState:provisioningState, PowerState:powerState}' \
+    --output table"
+
+#save the public IP address of the public VM to a variable named PUBLICIP
+PUBLICIP="$(az vm list-ip-addresses \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --name public \
+    --query "[].virtualMachine.network.publicIpAddresses[*].ipAddress" \
+    --output tsv)"
+
+echo $PUBLICIP
+
+# save the public IP address of the private VM to a variable named PRIVATEIP.
+PRIVATEIP="$(az vm list-ip-addresses \
+    --resource-group learn-cb427750-637a-4a83-9343-05faf4d3f339 \
+    --name private \
+    --query "[].virtualMachine.network.publicIpAddresses[*].ipAddress" \
+    --output tsv)"
+
+echo $PRIVATEIP
+
+########Now time to Test traffic routing through the network virtual appliance #########
+
+# trace the route from public to private
+ssh -t -o StrictHostKeyChecking=no azureuser@$PUBLICIP 'traceroute private --type=icmp; exit' # Trace go through NVA and then to VM
+
+#  trace the route from private to public
+ssh -t -o StrictHostKeyChecking=no azureuser@$PRIVATEIP 'traceroute public --type=icmp; exit' # Trace go direct to VM
