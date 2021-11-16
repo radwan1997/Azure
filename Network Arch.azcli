@@ -1,0 +1,103 @@
+#Create the CoreServicesVnet virtual network in westus
+
+az network vnet create \
+    --resource-group yourRG \
+    --name CoreServicesVnet \
+    --address-prefixes 10.20.0.0/16 \
+    --location westus
+
+#Cresting Subnets
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name CoreServicesVnet \
+    --name GatewaySubnet \
+    --address-prefixes 10.20.0.0/27
+
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name CoreServicesVnet \
+    --name SharedServicesSubnet \
+    --address-prefixes 10.20.10.0/24
+
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name CoreServicesVnet \
+    --name DatabaseSubnet \
+    --address-prefixes 10.20.20.0/24
+
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name CoreServicesVnet \
+    --name PublicWebServiceSubnet \
+    --address-prefixes 10.20.30.0/24
+
+    #Check created Subnets
+
+    az network vnet subnet list \
+    --resource-group yourRG \
+    --vnet-name CoreServicesVnet \
+    --output table
+
+#Create the ManufacturingVnet virtual network in northeurope
+
+az network vnet create \
+    --resource-group yourRG \
+    --name ManufacturingVnet \
+    --address-prefixes 10.30.0.0/16 \
+    --location northeurope
+
+    #create Subnets    
+    az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name ManufacturingVnet \
+    --name ManufacturingSystemSubnet \
+    --address-prefixes 10.30.10.0/24
+
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet1 \
+    --address-prefixes 10.30.20.0/24
+
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet2 \
+    --address-prefixes 10.30.21.0/24
+
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet3 \
+    --address-prefixes 10.30.22.0/24
+
+
+#Check created subnets
+az network vnet subnet list \
+    --resource-group yourRG \
+    --vnet-name ManufacturingVnet \
+    --output table
+
+
+
+#Create the ResearchVnet virtual network in westindia
+
+az network vnet create \
+    --resource-group yourRG \
+    --name ResearchVnet \
+    --address-prefixes 10.40.40.0/24 \
+    --location westindia
+
+#Create Subnet
+az network vnet subnet create \
+    --resource-group yourRG \
+    --vnet-name ResearchVnet \
+    --name ResearchSystemSubnet \
+    --address-prefixes 10.40.40.0/24
+
+
+#check subnets
+az network vnet subnet list \
+--resource-group yourRG \
+--vnet-name ResearchVnet \
+--output table
