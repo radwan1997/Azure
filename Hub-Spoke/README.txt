@@ -27,7 +27,7 @@ Today we will deploy a hub-spoke toppology conatin:
 let's take a quick look to our jason file parameters.
 
 ---------------------------------------------------------------------------------------------------------------
-Parameter	    Type	            Description	                                                    Default
+Parameter	        Type	            Description	                                                    Default
 windowsVMCount  	int	            Number of Windows virtual machines to create in spoke network.  	0
 linuxVMCount	    int	            Number of Linux virtual machines to create in spoke network.	    0
 adminUserName	    string	        If deploying virtual machines, the admin user name.	                null
@@ -53,6 +53,26 @@ now begin with Infra
 az deployment group create \
     --resource-group hub-spoke \
     --template-uri JASON_TEMPLATE_LINK
+
+
+
+Time for add some work:
+Deploy Infra with virtual machines
+
+az deployment group create \
+    --resource-group hub-spoke \
+    --template-uri yuor_url_for_file \
+    --parameters adminPassword=Password2020! linuxVMCount=1 windowsVMCount=1 #add numer of vms as you want
+
+
+How about some magic
+Deploy Infra and vms with VPN gateway too
+
+az deployment group create \
+    --resource-group hub-spoke \
+    --template-uri yuor_url_for_file \
+    --parameters adminPassword=Password2020! linuxVMCount=1 windowsVMCount=1 deployVpnGateway=true #add vpnGateway
+
 
 
 
