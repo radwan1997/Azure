@@ -96,3 +96,17 @@ for get ID (just in practice )
 id = $(az ts show --name name_for_spec --resource-group RG_for_templeate --version "1.0a" --query "id")
 
 ----
+What about pass parameters in your main file?
+you have to choices:
+(1) Pass parameter inline
+az deployment group create \
+  --resource-group RG_for_new_INFRA \
+  --template-spec $id \ # Main template file
+  --parameters storageAccountType='Standard_GRS' #for example change storage type in main template
+
+
+(2) Create a local parameter file then pass it to main file
+az deployment group create \
+  --resource-group demoRG \
+  --template-spec $id \ # Main template file
+  --parameters "local_para_file"
