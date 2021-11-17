@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 One of choices to get template is Deploy template spec
 Okay, let me show you how?
-if you have teplate like what you have now and want to run it in your environment, one of choices is store ARM Template in Azure and use it anytime and share it with your team too using (RBAC) no need to SAS tokens beside users just need read access and use it with powershell or DevOps pipeline.
+if you have Template and want to run it in your environment, one of choices is store ARM Template in Azure and use it anytime and share it with your team too using (RBAC) no need to SAS tokens beside users just need read access and use it with powershell or DevOps pipeline.
 
 now let's begin:
 Create a template spec by using:
@@ -26,7 +26,7 @@ az ts show \
 
 now you do it, what about deploy it now?
 Okay let me show you how.
-this tempalte in Azure now is resource and in Azure evey resource have an resource ID.
+This tempalte in Azure now is resource and in Azure evey resource have an resource ID.
 we will use this resource id to get path for out template like URI
 
 id = "your_template_json_file_ID"
@@ -41,6 +41,7 @@ id = $(az ts show --name name_for_spec --resource-group RG_for_templeate --versi
 ----
 What about pass parameters in your main file?
 you have to choices:
+
 (1) Pass parameter inline
 az deployment group create \
   --resource-group RG_for_new_INFRA \
@@ -64,3 +65,23 @@ Is it will be good to make all this in one file!?
 
 Yes, you are right. we will make template for evey one of them, but you will have to run evey one with seprate commands!!
 Here you can use Linked Template.
+
+Create the main template and the linked template.
+In our main Folder for spec templates we will create main file named azuredeploy.json 
+and folder named artifacts conatin our linked templates.
+[1] first linked file >>artifacts/webapp.json
+[2] second linked file >>artifacts/database.json
+[3] third linked file >>artifacts/network.json
+
+
+
+
+to use link you can choose between two choices:
+(1) RelativePath
+
+
+
+
+Okay we have main_file.json file which will enclude path for every another template file
+
+
