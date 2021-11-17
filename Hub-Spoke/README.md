@@ -25,7 +25,7 @@ Today we will deploy a hub-spoke toppology conatin:
 *All resources will send diagnostics to Azure Log Analytics
 
 let's take a quick look to our jason file parameters.
-.
+
 ---------------------------------------------------------------------------------------------------------------
 Parameter	    Type	            Description	                                                    Default
 windowsVMCount  	int	            Number of Windows virtual machines to create in spoke network.  	0
@@ -40,7 +40,10 @@ vpnGateway	        object	        Network configuration for the vpn gateway.	   
 bastionHost	        object	        Configuration for the Bastion host.	                        [see template]
 azureFirewall	    object	        Network configuration for the firewall instance.	        [see template]
 location	        string	        Deployment location.	                            resourceGroup().locatio
+
 ---------------------------------------------------------------------------------------------------------------
+
+
 Now time for Deploying our code.
 First let's begin with creating RG
 az group create --name RG_name --location RG_loc
