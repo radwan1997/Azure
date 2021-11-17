@@ -55,5 +55,44 @@ az deployment group create \
     --template-uri JASON_TEMPLATE_LINK
 
 
+------------------------------------------------------------------------
+One of choices to get template is Deploy template spec
+Okay, let me show you how?
+if you have teplate like what you have now and want to run it in your environment, one of choices is store ARM Template in Azure and use it anytime and share it with your team too using (RBAC) no need to SAS tokens beside users just need read access and use it with powershell or DevOps pipeline.
 
+now let's begin:
+Create a template spec by using:
+az ts create \
+  --name name_for_spec \
+  --version "1.0a" \
+  --resource-group RG_for_templeate \
+  --location "RG_locat" \
+  --template-file "template_file_in_local_path"
 
+Just that you now have your store from templates
+
+let's check it:
+az ts list # it will list all your templates
+
+Do you want to see specific  tempale details and with specific virsion:
+
+az ts show \
+    --name name_for_spec \
+    --resource-group RG_for_templeate \
+    --version "1.0a" # Specific version
+
+now you do it, what about deploy it now?
+Okay let me show you how.
+this tempalte in Azure now is resource and in Azure evey resource have an resource ID.
+we will use this resource id to get path for out template like URI
+
+id = "your_template_json_file_ID"
+az deployment group create \
+  --resource-group RG_for_new_INFRA \
+  --template-spec $id
+
+for get ID (just in practice )
+
+id = $(az ts show --name name_for_spec --resource-group RG_for_templeate --version "1.0a" --query "id")
+
+----
