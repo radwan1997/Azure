@@ -70,7 +70,7 @@ Create the main template and the linked template.
 In our main Folder for spec templates we will create main file named azuredeploy.json 
 and folder named artifacts conatin our linked templates.
 [1] first linked file >>artifacts/webapp.json
-[2] second linked file >>artifacts/database.json
+[2] second linked file >>artifacts/storage.json
 [3] third linked file >>artifacts/network.json
 
 
@@ -78,6 +78,10 @@ and folder named artifacts conatin our linked templates.
 
 to use link you can choose between two choices:
 (1) RelativePath
+(2) id
+Both of them work well choose what yu want.
+
+Okay my friend that's it for today, see you later.
 
 
 
