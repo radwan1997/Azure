@@ -73,19 +73,27 @@ and folder named artifacts conatin our linked templates.
 [2] second linked file >>artifacts/storage.json
 [3] third linked file >>artifacts/network.json
 
-
+azuredeploy.json file will enclude path for every another template file
 
 
 to use link you can choose between two choices:
 (1) RelativePath
 (2) id
-Both of them work well choose what yu want.
+Both of them work well, choose what you want.
+
+Finally let me show you how we can deploy our template.
+
+az deployment group create \
+  --resource-group webRG \
+  --template-file "c:\Templates\deployTS\azuredeploy.json" \
+  --parameters tsResourceGroup=templateSpecRG tsName=storageSpec tsVersion=1.0
+
+In last example we spicify RG, specName, specVersion
+
 
 Okay my friend that's it for today, see you later.
 
 
 
-
-Okay we have main_file.json file which will enclude path for every another template file
 
 
